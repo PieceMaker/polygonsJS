@@ -370,8 +370,44 @@ var medialAxis = (function () {
         return root;
     }
 
+    function polylines2vertices(segments) {
+        var vertices = [];
+        var vertex = [];
+        for (var i = 0; i < segments.length; i++) {
+            if (segments[i] && segments[i].length) {
+                vertex = segments[i][0];
+                vertices.push({x: vertex.x, y: vertex.y});
+                for (var j = 1; j < segments[i].length; j++){
+                    vertex = segments[i][j];
+                    vertices.push({x: vertex.x, y: vertex.y});
+                }
+            }
+        }
+        return vertices;
+    }
+
+    function getVertices(origin, branch) {
+        if (branch.type == 'limb') {
+            return polylines2vertices([
+                [branch.vertex, origin]
+            ])
+        }
+        var newOrigin = branch.origin;
+        var vertices = polylines2vertices([
+            [newOrigin, origin]
+        ]);
+        for (var i = 0; i < branch.children.length; i++) {
+            if (branch.children[i] != null) {
+                vertices = vertices.concat(getVertices(newOrigin, branch.children[i]));
+            }
+        }
+        return vertices;
+    }
+
     return {
         createSkeleton: createSkeleton,
+        polylines2vertices: polylines2vertices,
+        getVertices: getVertices,
         LinearRay: LinearRay,
         ParabolicRay: ParabolicRay,
         LineSite: LineSite,
