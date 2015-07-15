@@ -265,15 +265,8 @@ var medialAxis = (function () {
                 //polyRing = _.clone(polygon[i]);
                 polyRing.pop(); //Instead of rewriting logic below, just remove closing vertex
                 for(var j = 0; j < polyRing.length; j++) {
-                    //if(i == 0) {
-                        //Outer ring
-                        previousPoint = polyRing[(j + polyRing.length - 1) % polyRing.length];
-                        nextPoint = polyRing[(j + 1) % polyRing.length];
-                    /*} else {
-                        //Inner ring
-                        previousPoint = polyRing[(j + 1) % polyRing.length];
-                        nextPoint = polyRing[(j + polyRing.length - 1) % polyRing.length];
-                    }*/
+                    previousPoint = polyRing[(j + polyRing.length - 1) % polyRing.length];
+                    nextPoint = polyRing[(j + 1) % polyRing.length];
                     var vertex = polyRing[j];
                     if (!previousPoint.nextEdge)
                         previousPoint.nextEdge = new LineSite([previousPoint, vertex]);
