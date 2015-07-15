@@ -243,7 +243,7 @@ var medialAxis = (function () {
 
 
         function isReflexVertex(vertex, previousVertex, nextVertex, polygonArea) {
-            return signedArea([previousVertex, vertex, nextVertex]) * polygonArea < 0;
+            return signedArea([[previousVertex, vertex, nextVertex, previousVertex]]) * polygonArea < 0;
             //TODO:Will only catch vertices of inner holes if they are going in the same direction.
             //TODO:Likely need to add if-statement to negate the answer when dealing with a hole.
         }
@@ -254,37 +254,54 @@ var medialAxis = (function () {
         //TODO:and possibly ReflexVertexSite, or there will be an extra if-statement that calls these two functions
         //TODO:with reversed inputs.
         function createInitialRays(polygon) {
+            var nextPoint;
+            var polyRing;
+            var previousPoint;
             var rays = [];
             var reflexPoints = [];
             var sites = [];
             for (var i = 0; i < polygon.length; i++) {
-                var previousPoint = polygon[(i + polygon.length - 1) % polygon.length];
-                var vertex = polygon[i];
-                if (!previousPoint.nextEdge)
-                    previousPoint.nextEdge = new LineSite([previousPoint, vertex]);
-                if (sites.length == 0)
-                    sites.push(previousPoint.nextEdge)
-                var nextPoint = polygon[(i + 1) % polygon.length];
-                if (!vertex.nextEdge)
-                    vertex.nextEdge = new LineSite([vertex, nextPoint]);
-                previousPoint.nextEdge.nextSite = vertex.nextEdge;
-                vertex.nextEdge.previousSite = previousPoint.nextEdge;
-                lineSites.push(vertex.nextEdge);
-                if (isReflexVertex(vertex, previousPoint, nextPoint, area)) {
-                    vertex.reflex = true;
-                    reflexPoints.push(vertex);
-                    var reflexVertexSite = new ReflexVertexSite(vertex, previousPoint.nextEdge, vertex.nextEdge);
-                    reflexVertexSite.previousSite.nextSite = reflexVertexSite;
-                    reflexVertexSite.nextSite.previousSite = reflexVertexSite;
-                    Array.prototype.push.apply(rays, reflexVertexSite.ignitePerpendicularRays());
-                    sites.push(reflexVertexSite);
-                } else {
-                    var ray = previousPoint.nextEdge.igniteRayWithLineSite(vertex.nextEdge, vertex, vertex);
-                    rays.push(ray);
-                    ray.medialRay = {type: 'limb', vertex: vertex, edge1: previousPoint.nextEdge, edge2: vertex.nextEdge,
-                        origin: vertex, children: []};
+                polyRing = polygon[i].slice(); //Replace with next line when lodash is available
+                //polyRing = _.clone(polygon[i]);
+                polyRing.pop(); //Instead of rewriting logic below, just remove closing vertex
+                for(var j = 0; j < polyRing.length; j++) {
+                    //if(i == 0) {
+                        //Outer ring
+                        previousPoint = polyRing[(j + polyRing.length - 1) % polyRing.length];
+                        nextPoint = polyRing[(j + 1) % polyRing.length];
+                    /*} else {
+                        //Inner ring
+                        previousPoint = polyRing[(j + 1) % polyRing.length];
+                        nextPoint = polyRing[(j + polyRing.length - 1) % polyRing.length];
+                    }*/
+                    var vertex = polyRing[j];
+                    if (!previousPoint.nextEdge)
+                        previousPoint.nextEdge = new LineSite([previousPoint, vertex]);
+                    if (sites.length == 0)
+                        sites.push(previousPoint.nextEdge);
+                    if (!vertex.nextEdge)
+                        vertex.nextEdge = new LineSite([vertex, nextPoint]);
+                    previousPoint.nextEdge.nextSite = vertex.nextEdge;
+                    vertex.nextEdge.previousSite = previousPoint.nextEdge;
+                    lineSites.push(vertex.nextEdge);
+                    if (isReflexVertex(vertex, previousPoint, nextPoint, area)) {
+                        vertex.reflex = true;
+                        reflexPoints.push(vertex);
+                        var reflexVertexSite = new ReflexVertexSite(vertex, previousPoint.nextEdge, vertex.nextEdge);
+                        reflexVertexSite.previousSite.nextSite = reflexVertexSite;
+                        reflexVertexSite.nextSite.previousSite = reflexVertexSite;
+                        Array.prototype.push.apply(rays, reflexVertexSite.ignitePerpendicularRays());
+                        sites.push(reflexVertexSite);
+                    } else {
+                        var ray = previousPoint.nextEdge.igniteRayWithLineSite(vertex.nextEdge, vertex, vertex);
+                        rays.push(ray);
+                        ray.medialRay = {
+                            type: 'limb', vertex: vertex, edge1: previousPoint.nextEdge, edge2: vertex.nextEdge,
+                            origin: vertex, children: []
+                        };
+                    }
+                    sites.push(vertex.nextEdge);
                 }
-                sites.push(vertex.nextEdge);
             }
             if (observers['initialized'])
                 observers['initialized'](rays, reflexPoints);

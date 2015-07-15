@@ -87,9 +87,15 @@ function polylines2path(segments) {
 }
 
 function polygon2path(polygon) {
+    var polyRing;
     var res = '';
-    for (var i = 0; i < polygon.length; i++)
-        res += (i == 0 ? 'M' : 'L') + ppp(polygon[i]) + ' ';
+    for (var i = 0; i < polygon.length; i++) {
+        polyRing = polygon[i].slice();
+        //polyRing.pop();
+        for(var j = 0; j < polyRing.length; j++) {
+            res += (j == 0 ? 'M' : 'L') + ppp(polyRing[j]) + ' ';
+        }
+    }
     return res + ' Z';
 }
 

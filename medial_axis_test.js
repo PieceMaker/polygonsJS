@@ -449,46 +449,50 @@ test('LLL solver with flat vertex', function () {
     ]);
 });
 test('medial axis1, 3 reflex points', function () {
-    createSkeletonWithDisplay([
+    createSkeletonWithDisplay([[
         p(10, 10),
         p(100, 10),
         p(50, 65),
         p(100, 140),
         p(40, 100),
         p(10, 140),
-        p(20, 100)
-    ]);
+        p(20, 100),
+        p(10, 10)
+    ]]);
 });
 test('medial axis2, 1 reflex point', function () {
-    createSkeletonWithDisplay([
+    createSkeletonWithDisplay([[
         p(10, 10),
         p(100, 10),
         p(100, 140),
         p(40, 100),
-        p(10, 140)
-    ]);
+        p(10, 140),
+        p(10, 10)
+    ]]);
 });
 
 
 test('medial axis3, convex polygon', function () {
-    createSkeletonWithDisplay([
+    createSkeletonWithDisplay([[
         p(10, 10),
         p(100, 10),
         p(150, 60),
         p(150, 100),
         p(100, 140),
         p(20, 150),
-        p(10, 140)
-    ]);
+        p(10, 140),
+        p(10, 10)
+    ]]);
 });
 
 test('medial axis4, rectangle', function () {
-    createSkeletonWithDisplay([
+    createSkeletonWithDisplay([[
         p(10, 10),
         p(100, 10),
         p(100, 140),
-        p(10, 140)
-    ]);
+        p(10, 140),
+        p(10, 10)
+    ]]);
 });
 
 test('medial axis5, convex polygon', function () {
@@ -507,17 +511,18 @@ test('medial axis5, convex polygon', function () {
         [465, 503],
         [439, 510],
         [367, 475],
-        [348, 438]
+        [348, 438],
+        [326, 361]
     ];
     var polygon2 = [];
     for (var i = 0; i < p2.length; i++) {
         polygon2.push(p((p2[i][0] - 326) / 2, (p2[i][1] - 220) / 2));
     }
-    createSkeletonWithDisplay(polygon2);
+    createSkeletonWithDisplay([polygon2]);
 });
 
 test('medial axis6, rectangle with flat vertices', function () {
-    createSkeletonWithDisplay([
+    createSkeletonWithDisplay([[
         p(10, 10),
         p(100, 10),
         p(100, 20),
@@ -533,11 +538,11 @@ test('medial axis6, rectangle with flat vertices', function () {
         p(10, 40),
         p(10, 30),
         p(10, 20)
-    ]);
+    ]]);
 });
 
 test('snake', function () {
-    var poly = [p(458, 39),
+    var poly = [[p(458, 39),
         p(458, 39),
         p(395, 46),
         p(308, 76),
@@ -579,8 +584,9 @@ test('snake', function () {
         p(326, 35),
         p(391, 25),
         p(456, 23),
-        p(498, 15)
-    ];
+        p(498, 15),
+        p(458, 39)
+    ]];
     for (var i = 0; i < poly.length; i++) {
         var point = poly[i];
         point.x /= 2.5;
@@ -610,7 +616,7 @@ test('cut square with hole', function () {
     var inserted3 = cp(halfOuterSide - wallThickness, 0);
     var inserted4 = cp(halfOuterSide, 0);
 
-    var polygon = [
+    var polygon = [[
         cp(-halfOuterSide, -halfOuterSide),
         cp(-halfOuterSide, halfOuterSide),
         cp(halfOuterSide, halfOuterSide),
@@ -622,8 +628,26 @@ test('cut square with hole', function () {
         cp(halfOuterSide - wallThickness, -halfOuterSide + wallThickness),
         inserted3,
         inserted4,
-        cp(halfOuterSide, -halfOuterSide)
-    ];
+        cp(halfOuterSide, -halfOuterSide),
+        cp(-halfOuterSide, -halfOuterSide)
+    ]];
     var root = createSkeletonWithDisplay(polygon, {afterProcess: extractDCELAfterProcess});
 
+});
+
+test('medial axis7, rectangle', function () {
+    createSkeletonWithDisplay([[
+        p(10, 10),
+        p(100, 10),
+        p(100, 140),
+        p(10, 140),
+        p(10, 10)
+    ],
+    [
+        p(20, 70),
+        p(20, 80),
+        p(30, 80),
+        p(30, 70),
+        p(20, 70)
+    ]]);
 });

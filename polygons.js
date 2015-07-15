@@ -5,17 +5,40 @@
 //to be replaced by a vertex radius filter when there is a kd map.
 function pointInPolygon(point, polygon) {
     var x = point.x, y = point.y;
-    var inside = false;
+    var inside;
+    var polyRing;
+    var segment;
     //j = i++ assigns i to j first and then increments
-    for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-        var xi = polygon[i].x, yi = polygon[i].y;
-        var xj = polygon[j].x, yj = polygon[j].y;
+    for(var i = 0; i < polygon.length; i++) {
+        polyRing = polygon[i].slice(); //Replace with next line when lodash is available
+        //polyRing = _.clone(polygon[i]);
+        polyRing.pop(); //Instead of rewriting logic below, just remove closing vertex
+        inside = false;
+        for (var j = 0, k = polyRing.length - 1; j < polyRing.length; k = j++) {
+            var xj = polyRing[j].x, yj = polyRing[j].y;
+            var xk = polyRing[k].x, yk = polyRing[k].y;
 
-        var intersect = ((yi > y) != (yj > y))
-            && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-        if (intersect) inside = !inside;
+            //Inner ring
+            if(i > 0) {
+                segment = [p(xj, yj), p(xk, yk)];
+                //If the hole is on the boundary of an inner ring, then we are done and return true
+                if(distToSegmentSquared(point, segment) == 0) {
+                    return true;
+                }
+            }
+
+            var intersect = ((yj > y) != (yk > y))
+                && (x < (xk - xj) * (y - yj) / (yk - yj) + xj);
+            if (intersect) inside = !inside;
+        }
+
+        //Return false if the hole is not in the outer ring or it is in an inner ring
+        if((i == 0 && !inside) || (i > 0 && inside)) {
+            return false;
+        }
     }
-    return inside;
+    //If we reach this point, then the hole is in the outer ring and not in an inner ring
+    return true;
     //TODO:Need to check whether the point intersects the outer ring. If it does, then
     //TODO:check inner rings for intersection. If there is intersection, then check if the
     //TODO:point is on the ring or in the ring. If it is in the ring, then return false. If
@@ -120,11 +143,15 @@ function distToSegmentSquared(point, segment) {
 function signedArea(polygon) {
     var area = 0;
     for (var i = 0; i < polygon.length; i++) {
-        var next = polygon[(i + 1) % polygon.length]; //TODO:This closes the polygon, using the first vertex when the
-                                                      //TODO:last is reached. This can be removed when our polygons have
-                                                      //TODO:a closing vertex listed. Will also need to change loop to
-                                                      //TODO:end at polygon.length-1.
-        area += polygon[i].x * next.y - polygon[i].y * next.x;
+        var polyRing = polygon[i].slice(); //Replace with next line when lodash is available
+        //var polyRing = _.clone(polygon[i]);
+        for(var j = 0; j < polyRing.length-1; j++) {
+            var next = polyRing[j + 1]; //TODO:This closes the polygon, using the first vertex when the
+                                        //TODO:last is reached. This can be removed when our polygons have
+                                        //TODO:a closing vertex listed. Will also need to change loop to
+                                        //TODO:end at polygon.length-1.
+            area += polyRing[j].x * next.y - polyRing[j].y * next.x;
+        }
     }
     return area / 2;
 }
