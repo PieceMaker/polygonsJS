@@ -6,6 +6,7 @@
 function pointInPolygon(point, polygon) {
     var x = point.x, y = point.y;
     var inside = false;
+    //j = i++ assigns i to j first and then increments
     for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
         var xi = polygon[i].x, yi = polygon[i].y;
         var xj = polygon[j].x, yj = polygon[j].y;
@@ -15,6 +16,11 @@ function pointInPolygon(point, polygon) {
         if (intersect) inside = !inside;
     }
     return inside;
+    //TODO:Need to check whether the point intersects the outer ring. If it does, then
+    //TODO:check inner rings for intersection. If there is intersection, then check if the
+    //TODO:point is on the ring or in the ring. If it is in the ring, then return false. If
+    //TODO:it is on the ring, then return true. To check if it on the ring, check if the distance
+    //TODO:to the segment is 0.
 }
 
 function commonVertex(segment1, segment2) {
@@ -114,7 +120,10 @@ function distToSegmentSquared(point, segment) {
 function signedArea(polygon) {
     var area = 0;
     for (var i = 0; i < polygon.length; i++) {
-        var next = polygon[(i + 1) % polygon.length];
+        var next = polygon[(i + 1) % polygon.length]; //TODO:This closes the polygon, using the first vertex when the
+                                                      //TODO:last is reached. This can be removed when our polygons have
+                                                      //TODO:a closing vertex listed. Will also need to change loop to
+                                                      //TODO:end at polygon.length-1.
         area += polygon[i].x * next.y - polygon[i].y * next.x;
     }
     return area / 2;

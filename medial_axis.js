@@ -244,10 +244,15 @@ var medialAxis = (function () {
 
         function isReflexVertex(vertex, previousVertex, nextVertex, polygonArea) {
             return signedArea([previousVertex, vertex, nextVertex]) * polygonArea < 0;
+            //TODO:Will only catch vertices of inner holes if they are going in the same direction.
+            //TODO:Likely need to add if-statement to negate the answer when dealing with a hole.
         }
 
         var lineSites = [];
 
+        //TODO:Possibly add an inner-ring argument that is logical. This will either be passed to isReflexVertex
+        //TODO:and possibly ReflexVertexSite, or there will be an extra if-statement that calls these two functions
+        //TODO:with reversed inputs.
         function createInitialRays(polygon) {
             var rays = [];
             var reflexPoints = [];
